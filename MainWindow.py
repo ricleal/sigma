@@ -1,9 +1,13 @@
 import sys
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit,
                              QSpinBox, QGridLayout, QHBoxLayout,
-                             QApplication, QPushButton)
+                             QApplication, QPushButton, QMessageBox)
 import sympy as sp
 import math
+import signal
+
+# Ctrl-c kills app
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -100,36 +104,54 @@ class MainWindow(QWidget):
         self.function = sp.S(input_str)
         self.symbols = []
 
+        print("-"*80)
         # Read all displayed vars into symbols
         for i in range(self.num_var):
             symbol = sp.Symbol(self.var_names[i].displayText())
             self.symbols.append(symbol)
+        # print("Simbols:", self.symbols)
 
         # Derive func after every var and print
-        for var in self.symbols:
-            print("df/d{} = {}".format(var, sp.diff(self.function, var)))
+        # for var in self.symbols:
+        #     print("Derivative of every Simbol:")
+        #     print("df/d{} = {}".format(var, sp.diff(self.function, var)))
 
         # Get values as dict
         vals = {}
         for i in range(self.num_var):
             vals[self.symbols[i]] = float(self.var_values[i].displayText())
+            #print("Symbol value {} = {}".format(self.symbols[i], self.var_values[i].displayText()))
 
         # Get errors as num list
         errors = []
         for i in range(self.num_var):
             errors.append(float(self.var_errors[i].displayText()))
+            #print("Symbol error {} = {}".format(self.symbols[i], self.var_errors[i].displayText()))
 
         # Get every derivative
         derivs = []
         for i in range(self.num_var):
             derivs.append(sp.diff(self.function, self.symbols[i]))
-
+            #print("Derivative {} = {}".format(self.symbols[i], sp.diff(self.function, self.symbols[i])))
+            print("df/d{} = {}".format(self.symbols[i], sp.diff(self.function, self.symbols[i])))
         error_sq = 0.0
+
+        computation_str = ""
         for i in range(self.num_var):
             temp = derivs[i].evalf(subs=vals)
+            # computation_str+="(df/d{}".format(self.symbols[i])
+            computation_str+="({}".format(sp.diff(self.function, self.symbols[i]))
             temp *= errors[i]
+            computation_str+=" * E({})".format(self.symbols[i])
             temp *= temp
+            computation_str+=")^2"
             error_sq += temp
+            
+            if i < self.num_var - 1:
+                computation_str+=" + "
+
+        
+        print("ERROR:", computation_str)
 
         print("Result: {} +- {}".format(float(self.function.evalf(subs=vals)),
                                         float(math.sqrt(error_sq))))

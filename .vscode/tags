@@ -1,0 +1,13 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+MainWindow	../MainWindow.py	/^class MainWindow(QWidget):$/;"	kind:class	line:8
+MainWindow.py	../MainWindow.py	1;"	kind:file	line:1
+__init__	../MainWindow.py	/^    def __init__(self):$/;"	kind:member	line:9
+app	../MainWindow.py	/^    app = QApplication(sys.argv)$/;"	kind:variable	line:138
+compute	../MainWindow.py	/^    def compute(self):$/;"	kind:member	line:97
+var_num_changed	../MainWindow.py	/^    def var_num_changed(self, num):$/;"	kind:member	line:83
+w	../MainWindow.py	/^    w = MainWindow()$/;"	kind:variable	line:139
