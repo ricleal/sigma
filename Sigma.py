@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 from PyQt5.QtWidgets import (QWidget, QLabel, QLineEdit,
                              QSpinBox, QGridLayout, QHBoxLayout,
@@ -8,6 +10,7 @@ import signal
 
 # Ctrl-c kills app
 signal.signal(signal.SIGINT, signal.SIG_DFL)
+
 
 class MainWindow(QWidget):
     def __init__(self):
@@ -70,18 +73,29 @@ class MainWindow(QWidget):
         self.var_num_changed(self.num_var)
 
         # Add function widgets
-        self.grid.addWidget(QLabel("function"), self.max_var+1, 0)
+        self.grid.addWidget(QLabel("Function:"), self.max_var+1, 0)
+        self.grid.addWidget(QLabel("Error:"), self.max_var+2, 0)
+        self.grid.addWidget(QLabel("Result:"), self.max_var+3, 0)
+
         self.func_edit = QLineEdit()
         self.grid.addWidget(self.func_edit, self.max_var+1, 1)
 
+        self.error_edit = QLineEdit()
+        self.grid.addWidget(self.error_edit, self.max_var+2, 1, 1, 3)
+        self.error_edit.setReadOnly(True)
+
+        self.result_edit = QLineEdit()
+        self.grid.addWidget(self.result_edit, self.max_var+3, 1, 1, 3)
+        self.result_edit.setReadOnly(True)
+
         self.cmp_btn = QPushButton("Compute")
-        self.grid.addWidget(self.cmp_btn, self.max_var+2, 1)
+        self.grid.addWidget(self.cmp_btn, self.max_var+4, 1)
 
         self.cmp_btn.clicked.connect(self.compute)
 
         self.setLayout(self.grid)
         self.setGeometry(300, 300, 500, 300)
-        self.setWindowTitle('sigma')
+        self.setWindowTitle('Error Propagation')
         self.show()
 
     def var_num_changed(self, num):
@@ -133,28 +147,33 @@ class MainWindow(QWidget):
         for i in range(self.num_var):
             derivs.append(sp.diff(self.function, self.symbols[i]))
             #print("Derivative {} = {}".format(self.symbols[i], sp.diff(self.function, self.symbols[i])))
-            print("df/d{} = {}".format(self.symbols[i], sp.diff(self.function, self.symbols[i])))
+            print(
+                "df/d{} = {}".format(self.symbols[i], sp.diff(self.function, self.symbols[i])))
         error_sq = 0.0
 
         computation_str = ""
         for i in range(self.num_var):
             temp = derivs[i].evalf(subs=vals)
             # computation_str+="(df/d{}".format(self.symbols[i])
-            computation_str+="({}".format(sp.diff(self.function, self.symbols[i]))
+            computation_str += "({}".format(sp.diff(self.function,
+                                                    self.symbols[i]))
             temp *= errors[i]
-            computation_str+=" * E({})".format(self.symbols[i])
+            computation_str += " * E({})".format(self.symbols[i])
             temp *= temp
-            computation_str+=")^2"
+            computation_str += ")^2"
             error_sq += temp
-            
-            if i < self.num_var - 1:
-                computation_str+=" + "
 
-        
+            if i < self.num_var - 1:
+                computation_str += " + "
+
         print("ERROR:", computation_str)
+        self.error_edit.setText(computation_str)
 
         print("Result: {} +- {}".format(float(self.function.evalf(subs=vals)),
                                         float(math.sqrt(error_sq))))
+        self.result_edit.setText("{} +- {:.3f}".format(float(self.function.evalf(subs=vals)),
+                                                       float(math.sqrt(error_sq))))
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
